@@ -9,19 +9,57 @@ using std::endl;
 using std::istringstream;
 using std::cerr;
 
+void Test(int M, int N, int K, int version)
+{
+	MatMulFunc f{ MatMul0 };
+	switch (version)
+	{
+		case 0:
+			f = MatMul0;
+			break;
+		case 1:
+			f = MatMul1;
+			break;
+		default:
+			break;
+	}
+
+	const float tolerance = 1e-5;
+	const int nrepeats = 4;
+
+	float* A, * B, * C, * GT;
+	MallocMatrix(M, N, K, A, B, C, GT);
+
+	InitABCGT(M, N, K, A, B, C, GT);
+
+	for (size_t i = 0; i < nrepeats; i++)
+		MatMulGT(M, N, K, A, B, GT);
+
+	for (size_t i = 0; i < nrepeats; i++)
+		f(M, N, K, A, B, C);
+
+	CheckResult(M, N, C, GT, tolerance);
+
+	FreeMatrix(A, B, C, GT);
+}
+
 int main(int argc, char* argv[])
 {
-	const float tolerance = 1e0;
-	int M, N, K;
-	if (argc != 4)
+	int M, N, K, version;
+	if (argc != 5)
 	{
-		cout << "Error: require 3 arguments, but " << argc - 1 << " provided." << endl;
+		cout << "Error: require 4 arguments, but " << argc - 1 << " provided." << endl;
 		return 1;
 	}
 
-	istringstream iss1(argv[1]), iss2(argv[2]), iss3(argv[3]);
-	if (!(iss1 >> M) || !(iss2 >> N) || !(iss3 >> K)) {
+	istringstream iss1(argv[1]), iss2(argv[2]), iss3(argv[3]), iss4(argv[4]);
+	if (!(iss1 >> M) || !(iss2 >> N) || !(iss3 >> K))
+	{
 		cerr << "Error: invalid integer arguments." << endl;
+		return 1;
+	}
+	if (!(iss4 >> version)) {
+		cerr << "Error: invalid matmul version." << endl;
 		return 1;
 	}
 	if (M <= 0 || N <= 0 || K <= 0)
@@ -30,20 +68,5 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	float *A, *B, *C, *GT;
-	MallocMatrix(M, N, K, A, B, C, GT);
-
-	InitAB(M, N, K, A, B);
-	InitC(M, N, C);
-	InitC(M, N, GT);
-	MatMulGT(M, N, K, A, B, GT);
-	
-	MatMul0(M, N, K, A, B, C);
-	//MatMul1(M, N, K, A, B, C);
-
-	CheckResult(M, N, C, GT, tolerance);
-	
-	PrintABC(M, N, K, A, B, C);
-
-	FreeMatrix(A, B, C, GT);
+	Test(M, N, K, version);
 }

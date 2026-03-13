@@ -4,9 +4,7 @@ void MallocMatrix(int M, int N, int K, float*& A, float*& B, float*& C, float*& 
 
 void FreeMatrix(float*& A, float*& B, float*& C, float*& GT);
 
-void InitAB(int M, int N, int K, float* A, float* B);
-
-void InitC(int M, int N, float* C);
+void InitABCGT(int M, int N, int K, float* A, float* B, float* C, float* GT);
 
 void PrintABC(int M, int N, int K, float* A, float* B, float* C);
 

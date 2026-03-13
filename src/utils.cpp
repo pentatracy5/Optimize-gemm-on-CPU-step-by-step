@@ -30,7 +30,7 @@ void FreeMatrix(float*& A, float*& B, float*& C, float*& GT)
 	GT = nullptr;
 }
 
-void InitAB(int M, int N, int K, float* A, float* B)
+void InitABCGT(int M, int N, int K, float* A, float* B, float* C, float* GT)
 {
 	mt19937 engine(random_device{}());
 	uniform_real_distribution<float> dist(0.0f, 1.0f);
@@ -39,11 +39,8 @@ void InitAB(int M, int N, int K, float* A, float* B)
 		A[i] = dist(engine);
 	for (size_t i = 0; i < K * N; i++)
 		B[i] = dist(engine);
-}
-
-void InitC(int M, int N, float* C)
-{
 	fill(C, C + M * N, 0);
+	fill(GT, GT + M * N, 0);
 }
 
 void PrintABC(int M, int N, int K, float* A, float* B, float* C)
