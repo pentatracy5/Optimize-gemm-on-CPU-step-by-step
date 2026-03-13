@@ -52,7 +52,7 @@ void PrintABC(int M, int N, int K, float* A, float* B, float* C)
 	for (size_t i = 0; i < M; i++)
 	{
 		for (size_t k = 0; k < K; k++)
-			cout << A(i, k) << " ";
+			cout << A[i * K + k] << " ";
 		cout << endl;
 	}
 
@@ -60,7 +60,7 @@ void PrintABC(int M, int N, int K, float* A, float* B, float* C)
 	for (size_t k = 0; k < K; k++)
 	{
 		for (size_t j = 0; j < N; j++)
-			cout << B(k, j) << " ";
+			cout << B[k * N + j] << " ";
 		cout << endl;
 	}
 
@@ -68,18 +68,18 @@ void PrintABC(int M, int N, int K, float* A, float* B, float* C)
 	for (size_t i = 0; i < M; i++)
 	{
 		for (size_t j = 0; j < N; j++)
-			cout << C(i, j) << " ";
+			cout << C[i * N + j] << " ";
 		cout << endl;
 	}
 }
 
-void CheckResult(int M, int N, float* C, float* GT)
+void CheckResult(int M, int N, float* C, float* GT, float tolerance)
 {
 	for (size_t i = 0; i < M; i++)
 		for (size_t j = 0; j < N; j++) 
-			if (fabs(C(i, j) - GT(i, j)) > TOLERANCE)
+			if (fabs(C[i * N + j] - GT[i * N + j]) > tolerance)
 			{
-				cout << "Error: C(" << i << ", " << j << ") = " << C(i, j) << ", but expected " << GT[i * N + j] << endl;
+				cout << "Error: C(" << i << ", " << j << ") = " << C[i * N + j] << ", but expected " << GT[i * N + j] << endl;
 				return;
 			}
 	cout << "Check passed!" << endl;

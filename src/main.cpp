@@ -2,6 +2,7 @@
 #include <sstream>
 #include <utils.h>
 #include <matmul.h>
+#include <omp.h>
 
 using std::cout;
 using std::endl;
@@ -10,6 +11,7 @@ using std::cerr;
 
 int main(int argc, char* argv[])
 {
+	const float tolerance = 1e0;
 	int M, N, K;
 	if (argc != 4)
 	{
@@ -34,11 +36,12 @@ int main(int argc, char* argv[])
 	InitAB(M, N, K, A, B);
 	InitC(M, N, C);
 	InitC(M, N, GT);
-	MatMul0(M, N, K, A, B, GT);
+	MatMulGT(M, N, K, A, B, GT);
 	
 	MatMul0(M, N, K, A, B, C);
+	//MatMul1(M, N, K, A, B, C);
 
-	CheckResult(M, N, C, GT);
+	CheckResult(M, N, C, GT, tolerance);
 	
 	PrintABC(M, N, K, A, B, C);
 
