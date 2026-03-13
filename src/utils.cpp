@@ -46,7 +46,7 @@ void CheckResult(int M, int N, float* C, float* GT)
 {
 	for (size_t i = 0; i < M; i++)
 		for (size_t j = 0; j < N; j++) 
-			if (C(i, j) != GT(i, j))
+			if (fabs(C(i, j) - GT(i, j)) > TOLERANCE)
 			{
 				cout << "Error: C(" << i << ", " << j << ") = " << C(i, j) << ", but expected " << GT[i * N + j] << endl;
 				return;
