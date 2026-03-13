@@ -28,17 +28,19 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	float* A = (float*)malloc(sizeof(float) * M * K);
-	float* B = (float*)malloc(sizeof(float) * K * N);
-	float* C = (float*)malloc(sizeof(float) * M * N);
+	float *A, *B, *C, *GT;
+	MallocMatrix(M, N, K, A, B, C, GT);
 
-	InitABC(M, N, K, A, B, C);
-
+	InitAB(M, N, K, A, B);
+	InitC(M, N, C);
+	InitC(M, N, GT);
+	MatMul0(M, N, K, A, B, GT);
+	
 	MatMul0(M, N, K, A, B, C);
+
+	CheckResult(M, N, C, GT);
 	
 	PrintABC(M, N, K, A, B, C);
 
-	free(A);
-	free(B);
-	free(C);
+	FreeMatrix(A, B, C, GT);
 }

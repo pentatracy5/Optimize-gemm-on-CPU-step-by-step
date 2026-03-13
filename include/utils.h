@@ -6,7 +6,13 @@
 #define GT(i, j) GT[(i) * N + (j)] // M * N, GT means ground truth
 #define TOLERANCE 1e0
 
-void InitABC(int M, int N, int K, float* A, float* B, float* C);
+void MallocMatrix(int M, int N, int K, float*& A, float*& B, float*& C, float*& GT);
+
+void FreeMatrix(float*& A, float*& B, float*& C, float*& GT);
+
+void InitAB(int M, int N, int K, float* A, float* B);
+
+void InitC(int M, int N, float* C);
 
 void PrintABC(int M, int N, int K, float* A, float* B, float* C);
 
