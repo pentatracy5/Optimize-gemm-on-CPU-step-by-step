@@ -1,15 +1,12 @@
 ﻿#include <iostream>
 #include <sstream>
 #include <utils.h>
+#include <matmul.h>
 
 using std::cout;
 using std::endl;
 using std::istringstream;
 using std::cerr;
-
-#define A(i, k) A[(i) * K + (k)] // M * K
-#define B(k, j) B[(k) * N + (j)] // K * N
-#define C(i, j) C[(i) * N + (j)] // M * N
 
 int main(int argc, char* argv[])
 {
@@ -36,6 +33,10 @@ int main(int argc, char* argv[])
 	float* C = (float*)malloc(sizeof(float) * M * N);
 
 	InitABC(M, N, K, A, B, C);
+
+	MatMul0(M, N, K, A, B, C);
+	
+	PrintABC(M, N, K, A, B, C);
 
 	free(A);
 	free(B);
