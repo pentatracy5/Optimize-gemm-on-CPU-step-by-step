@@ -2,7 +2,7 @@
 #include <sstream>
 #include <utils.h>
 #include <matmul.h>
-#include <omp.h>
+#include <chrono>
 
 using std::cout;
 using std::endl;
@@ -20,27 +20,48 @@ void Test(int M, int N, int K, int version)
 		case 1:
 			f = MatMul1;
 			break;
+		case 2:
+			f = MatMul2;
+			break;
 		default:
 			break;
 	}
 
-	const float tolerance = 1e-5;
-	const int nrepeats = 4;
+	const float tolerance = 1e-1;
+	const int nrepeats = 10;
+	const int warmup = 2;
 
-	float* A, * B, * C, * GT;
-	MallocMatrix(M, N, K, A, B, C, GT);
+	float* A, * B, * C, * REF;
+	MallocMatrix(M, N, K, A, B, C, REF);
 
-	InitABCGT(M, N, K, A, B, C, GT);
+	InitABCREF(M, N, K, A, B, C, REF);
 
+	for (int i = 0; i < warmup; ++i) {
+		MatMulREF(M, N, K, A, B, REF);
+		f(M, N, K, A, B, C);
+	}
+
+	auto start = std::chrono::high_resolution_clock::now();
 	for (size_t i = 0; i < nrepeats; i++)
-		MatMulGT(M, N, K, A, B, GT);
+		MatMulREF(M, N, K, A, B, REF);
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = end - start;
+	double time_ref = elapsed.count() / nrepeats;
 
+	start = std::chrono::high_resolution_clock::now();
 	for (size_t i = 0; i < nrepeats; i++)
 		f(M, N, K, A, B, C);
+	end = std::chrono::high_resolution_clock::now();
+	elapsed = end - start;
+	double time_f = elapsed.count() / nrepeats;
 
-	CheckResult(M, N, C, GT, tolerance);
+	double flops = 2 * M / 1000.0 * N / 1000.0 * K / 1000.0;
+	cout << "M\tN\tK\tref_GFLOPS\tf_GFLOPS" << endl;
+	cout << M << '\t' << N << '\t' << K << '\t' << flops / time_ref << '\t' << flops / time_f << endl;
 
-	FreeMatrix(A, B, C, GT);
+	CheckResult(M, N, C, REF, tolerance);
+
+	FreeMatrix(A, B, C, REF);
 }
 
 int main(int argc, char* argv[])

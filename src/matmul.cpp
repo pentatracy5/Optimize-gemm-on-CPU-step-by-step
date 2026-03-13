@@ -2,7 +2,7 @@
 #include <utils.h>
 #include <Eigen/Dense> 
 
-void MatMulGT(int M, int N, int K, float* A, float* B, float* C)
+void MatMulREF(int M, int N, int K, float* A, float* B, float* C)
 {
 	Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> A_map(A, M, K);
 	Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> B_map(B, K, N);
@@ -24,4 +24,18 @@ void MatMul1(int M, int N, int K, float* A, float* B, float* C)
 		for (size_t k = 0; k < K; k++)
 			for (size_t j = 0; j < N; j++)
 				C[i * N + j] += A[i * K + k] * B[k * N + j];
+}
+
+void MatMul2(int M, int N, int K, float* A, float* B, float* C)
+{
+	const size_t ni = 128;
+	const size_t nj = 128;
+	const size_t nk = 64;
+	for (size_t i = 0; i < N; i += ni)
+		for (size_t k = 0; k < N; k += nk)
+			for (size_t j = 0; j < N; j += nj)
+				for (size_t mi = i; mi < i + ni; mi++)
+					for (size_t mk = k; mk < k + nk; mk++)
+						for (size_t mj = j; mj < j + nj; mj++)
+							C[mi * N + mj] += A[mi * K + mk] * B[mk * N + mj];
 }

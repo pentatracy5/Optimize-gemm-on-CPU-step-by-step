@@ -10,27 +10,27 @@ using std::mt19937;
 using std::random_device;
 using std::uniform_real_distribution;
 
-void MallocMatrix(int M, int N, int K, float*& A, float*& B, float*& C, float*& GT)
+void MallocMatrix(int M, int N, int K, float*& A, float*& B, float*& C, float*& REF)
 {
 	A = (float*)malloc(sizeof(float) * M * K);
 	B = (float*)malloc(sizeof(float) * K * N);
 	C = (float*)malloc(sizeof(float) * M * N);
-	GT = (float*)malloc(sizeof(float) * M * N);
+	REF = (float*)malloc(sizeof(float) * M * N);
 }
 
-void FreeMatrix(float*& A, float*& B, float*& C, float*& GT)
+void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
 {
 	free(A);
 	free(B);
 	free(C);
-	free(GT);
+	free(REF);
 	A = nullptr;
 	B = nullptr;
 	C = nullptr;
-	GT = nullptr;
+	REF = nullptr;
 }
 
-void InitABCGT(int M, int N, int K, float* A, float* B, float* C, float* GT)
+void InitABCREF(int M, int N, int K, float* A, float* B, float* C, float* REF)
 {
 	mt19937 engine(random_device{}());
 	uniform_real_distribution<float> dist(0.0f, 1.0f);
@@ -40,7 +40,7 @@ void InitABCGT(int M, int N, int K, float* A, float* B, float* C, float* GT)
 	for (size_t i = 0; i < K * N; i++)
 		B[i] = dist(engine);
 	fill(C, C + M * N, 0);
-	fill(GT, GT + M * N, 0);
+	fill(REF, REF + M * N, 0);
 }
 
 void PrintABC(int M, int N, int K, float* A, float* B, float* C)
@@ -70,13 +70,13 @@ void PrintABC(int M, int N, int K, float* A, float* B, float* C)
 	}
 }
 
-void CheckResult(int M, int N, float* C, float* GT, float tolerance)
+void CheckResult(int M, int N, float* C, float* REF, float tolerance)
 {
 	for (size_t i = 0; i < M; i++)
 		for (size_t j = 0; j < N; j++) 
-			if (fabs(C[i * N + j] - GT[i * N + j]) > tolerance)
+			if (fabs(C[i * N + j] - REF[i * N + j]) > tolerance)
 			{
-				cout << "Error: C(" << i << ", " << j << ") = " << C[i * N + j] << ", but expected " << GT[i * N + j] << endl;
+				cout << "Error: C(" << i << ", " << j << ") = " << C[i * N + j] << ", but expected " << REF[i * N + j] << endl;
 				return;
 			}
 	cout << "Check passed!" << endl;
