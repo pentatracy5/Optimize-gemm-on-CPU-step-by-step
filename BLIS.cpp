@@ -1,7 +1,10 @@
 ﻿#include <iostream>
+#include <sstream>
 
 using std::cout;
 using std::endl;
+using std::istringstream;
+using std::cerr;
 
 #define A(i, k) A[(i) * K + (k)] // M * K
 #define B(k, j) B[(k) * N + (j)] // K * N
@@ -9,12 +12,16 @@ using std::endl;
 
 int main(int argc, char* argv[])
 {
-	int M;
-	int N;
-	int K;
+	int M, N, K;
 	if (argc != 4)
 	{
 		cout << "Error: require 3 arguments, but " << argc - 1 << " provided." << endl;
-		exit(0);
+		return 1;
+	}
+
+	istringstream iss1(argv[1]), iss2(argv[2]), iss3(argv[3]);
+	if (!(iss1 >> M) || !(iss2 >> N) || !(iss3 >> K)) {
+		cerr << "Error: invalid integer arguments." << endl;
+		return 1;
 	}
 }
