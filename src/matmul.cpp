@@ -39,3 +39,17 @@ void MatMul2(int M, int N, int K, float* A, float* B, float* C)
 						for (size_t mj = j; mj < j + nj; mj++)
 							C[mi * N + mj] += A[mi * K + mk] * B[mk * N + mj];
 }
+
+void MatMul3(int M, int N, int K, float* A, float* B, float* C)
+{
+	const size_t ni = 32;
+	const size_t nj = 32;
+	const size_t nk = 32;
+	for (size_t j = 0; j < N; j += nj)
+		for (size_t k = 0; k < K; k += nk)
+			for (size_t i = 0; i < M; i += ni)
+				for (size_t mj = j; mj < j + nj; mj++)
+					for (size_t mi = i; mi < i + ni; mi++)
+						for (size_t mk = k; mk < k + nk; mk++)
+							C[mi * N + mj] += A[mi * K + mk] * B[mk * N + mj];
+}

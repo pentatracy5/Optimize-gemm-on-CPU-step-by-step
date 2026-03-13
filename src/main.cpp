@@ -23,6 +23,9 @@ void Test(int M, int N, int K, int version)
 		case 2:
 			f = MatMul2;
 			break;
+		case 3:
+			f = MatMul3;
+			break;
 		default:
 			break;
 	}
