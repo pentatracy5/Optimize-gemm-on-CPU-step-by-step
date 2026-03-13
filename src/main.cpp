@@ -1,25 +1,15 @@
 ﻿#include <iostream>
 #include <sstream>
-#include <algorithm>
+#include <utils.h>
 
 using std::cout;
 using std::endl;
 using std::istringstream;
 using std::cerr;
-using std::fill;
 
 #define A(i, k) A[(i) * K + (k)] // M * K
 #define B(k, j) B[(k) * N + (j)] // K * N
 #define C(i, j) C[(i) * N + (j)] // M * N
-
-void InitABC(int M, int N, int K, float* A, float* B, float* C)
-{
-	for (size_t i = 0; i < M * K; i++)
-		A[i] = (float)(i % 4 + 1);
-	for (size_t i = 0; i < K * N; i++)
-		B[i] = (float)(i % 4 + 1);
-	fill(C, C + M * N, 0);
-}
 
 int main(int argc, char* argv[])
 {
