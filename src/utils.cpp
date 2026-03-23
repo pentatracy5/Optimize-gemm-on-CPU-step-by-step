@@ -10,10 +10,10 @@ using std::mt19937;
 using std::random_device;
 using std::uniform_real_distribution;
 
-void MallocMatrix(int M, int N, int K, float*& A, float*& B, float*& C, float*& REF)
+void MallocMatrix(int M, int N, int L, float*& A, float*& B, float*& C, float*& REF)
 {
-	A = (float*)malloc(sizeof(float) * M * K);
-	B = (float*)malloc(sizeof(float) * K * N);
+	A = (float*)malloc(sizeof(float) * M * L);
+	B = (float*)malloc(sizeof(float) * L * N);
 	C = (float*)malloc(sizeof(float) * M * N);
 	REF = (float*)malloc(sizeof(float) * M * N);
 }
@@ -30,31 +30,31 @@ void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
 	REF = nullptr;
 }
 
-void InitABCREF(int M, int N, int K, float* A, float* B, float* C, float* REF)
+void InitABCREF(int M, int N, int L, float* A, float* B, float* C, float* REF)
 {
 	mt19937 engine(random_device{}());
 	uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-	for (size_t i = 0; i < M * K; i++)
+	for (size_t i = 0; i < M * L; i++)
 		A[i] = dist(engine);
-	for (size_t i = 0; i < K * N; i++)
+	for (size_t i = 0; i < L * N; i++)
 		B[i] = dist(engine);
 	fill(C, C + M * N, 0);
 	fill(REF, REF + M * N, 0);
 }
 
-void PrintABC(int M, int N, int K, float* A, float* B, float* C)
+void PrintABC(int M, int N, int L, float* A, float* B, float* C)
 {
 	cout << "Matrix A:" << endl;
 	for (size_t i = 0; i < M; i++)
 	{
-		for (size_t k = 0; k < K; k++)
-			cout << A[i * K + k] << " ";
+		for (size_t k = 0; k < L; k++)
+			cout << A[i * L + k] << " ";
 		cout << endl;
 	}
 
 	cout << "Matrix B:" << endl;
-	for (size_t k = 0; k < K; k++)
+	for (size_t k = 0; k < L; k++)
 	{
 		for (size_t j = 0; j < N; j++)
 			cout << B[k * N + j] << " ";
