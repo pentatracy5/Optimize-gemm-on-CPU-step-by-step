@@ -21,43 +21,23 @@ void ClearCache()
 		v[i] = i;
 }
 
-void Test(int M, int N, int L, int version)
+void Test(size_t M, size_t N, size_t K, unsigned int version)
 {
-	MatMulFunc f{ MatMul4 };
+	MatMulFunc f{ matmulFuncs[version]};
 	MatMulFunc ref{ MatMulREF };
-	switch (version)
-	{
-		case 0:
-			f = MatMul0;
-			break;
-		case 1:
-			f = MatMul1;
-			break;
-		case 2:
-			f = MatMul2;
-			break;
-		case 3:
-			f = MatMul3;
-			break;
-		case 4:
-			f = MatMul4;
-			break;
-		default:
-			break;
-	}
 
 	const float tolerance = 1e-1;
-	const int nrepeats = 4;
-	const int warmup = 2;
+	const size_t nrepeats = 2;
+	const size_t warmup = 2;
 
 	float* A, * B, * C, * REF;
-	MallocMatrix(M, N, L, A, B, C, REF);
+	MallocMatrix(M, N, K, A, B, C, REF);
 
-	InitABCREF(M, N, L, A, B, C, REF);
+	InitABCREF(M, N, K, A, B, C, REF);
 
-	for (int i = 0; i < warmup; ++i) {
-		ref(M, N, L, A, B, REF);
-		f(M, N, L, A, B, C);
+	for (size_t i = 0; i < warmup; ++i) {
+		ref(M, N, K, A, B, REF);
+		f(M, N, K, A, B, C);
 	}
 
 	std::chrono::duration<double> elapsed(0);
@@ -65,7 +45,7 @@ void Test(int M, int N, int L, int version)
 	{
 		ClearCache();
 		auto start = std::chrono::high_resolution_clock::now();
-		ref(M, N, L, A, B, REF);
+		ref(M, N, K, A, B, REF);
 		auto end = std::chrono::high_resolution_clock::now();
 		elapsed += end - start;
 	}
@@ -76,15 +56,15 @@ void Test(int M, int N, int L, int version)
 	{
 		ClearCache();
 		auto start = std::chrono::high_resolution_clock::now();
-		f(M, N, L, A, B, C);
+		f(M, N, K, A, B, C);
 		auto end = std::chrono::high_resolution_clock::now();
 		elapsed += end - start;
 	}
 	double time_f = elapsed.count() / nrepeats;
 
-	double flops = 2 * M / 1000.0 * N / 1000.0 * L / 1000.0;
+	double flops = 2 * M / 1000.0 * N / 1000.0 * K / 1000.0;
 	cout << "M\tN\tK\tref_GFLOPS\tf_GFLOPS" << endl;
-	cout << M << '\t' << N << '\t' << L << '\t' << flops / time_ref << '\t' << flops / time_f << endl;
+	cout << M << '\t' << N << '\t' << K << '\t' << flops / time_ref << '\t' << flops / time_f << endl;
 
 	CheckResult(M, N, C, REF, tolerance);
 
@@ -93,7 +73,8 @@ void Test(int M, int N, int L, int version)
 
 int main(int argc, char* argv[])
 {
-	int M, N, L, version;
+	size_t M, N, K;
+	unsigned int version;
 	if (argc != 5)
 	{
 		cout << "Error: require 4 arguments, but " << argc - 1 << " provided." << endl;
@@ -101,7 +82,7 @@ int main(int argc, char* argv[])
 	}
 
 	istringstream iss1(argv[1]), iss2(argv[2]), iss3(argv[3]), iss4(argv[4]);
-	if (!(iss1 >> M) || !(iss2 >> N) || !(iss3 >> L))
+	if (!(iss1 >> M) || !(iss2 >> N) || !(iss3 >> K))
 	{
 		cerr << "Error: invalid integer arguments." << endl;
 		return 1;
@@ -110,11 +91,11 @@ int main(int argc, char* argv[])
 		cerr << "Error: invalid matmul version." << endl;
 		return 1;
 	}
-	if (M <= 0 || N <= 0 || L <= 0)
+	if (M <= 0 || N <= 0 || K <= 0)
 	{
 		cerr << "Error: invalid arguments integer value." << endl;
 		return 1;
 	}
 
-	Test(M, N, L, version);
+	Test(M, N, K, version);
 }

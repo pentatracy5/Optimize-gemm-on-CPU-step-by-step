@@ -1,11 +1,11 @@
 #pragma once
 
-void MallocMatrix(int M, int N, int L, float*& A, float*& B, float*& C, float*& REF);
+void MallocMatrix(size_t M, size_t N, size_t K, float*& A, float*& B, float*& C, float*& REF);
 
 void FreeMatrix(float*& A, float*& B, float*& C, float*& REF);
 
-void InitABCREF(int M, int N, int L, float* A, float* B, float* C, float* REF);
+void InitABCREF(size_t M, size_t N, size_t K, float* A, float* B, float* C, float* REF);
 
-void PrintABC(int M, int N, int L, float* A, float* B, float* C);
+void PrintABC(size_t M, size_t N, size_t K, float* A, float* B, float* C);
 
-void CheckResult(int M, int N, float* C, float* REF, float tolerance);
+void CheckResult(size_t M, size_t N, float* C, float* REF, float tolerance);
