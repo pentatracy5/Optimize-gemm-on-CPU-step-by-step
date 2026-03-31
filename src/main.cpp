@@ -1,9 +1,10 @@
 ﻿#include <iostream>
 #include <sstream>
-#include <utils.h>
-#include <matmul.h>
 #include <chrono>
 #include <vector>
+#include <utils.h>
+#include <matmul.h>
+#include <config.h>
 
 using std::cout;
 using std::endl;
@@ -14,8 +15,8 @@ using std::vector;
 vector<int> v;
 void ClearCache()
 {
-	const size_t cache_size = 32 * 1024 * 1024;
-	const size_t num_elements = cache_size / sizeof(int);
+	constexpr size_t cache_size = 32 * 1024 * 1024;
+	constexpr size_t num_elements = cache_size / sizeof(int);
 	v.resize(num_elements, 0);
 	for (size_t i = 0; i < num_elements; i++)
 		v[i] = i;
@@ -23,12 +24,15 @@ void ClearCache()
 
 void Test(size_t M, size_t N, size_t K, unsigned int version)
 {
-	MatMulFunc f{ matmulFuncs[version]};
+	constexpr size_t totalVersions = sizeof(matmulFuncs) / sizeof(matmulFuncs[0]);
+	if (version >= totalVersions) version = totalVersions - 1;
+
+	MatMulFunc f{ matmulFuncs[version] };
 	MatMulFunc ref{ MatMulREF };
 
-	const float tolerance = 1e-1;
-	const size_t nrepeats = 2;
-	const size_t warmup = 2;
+	constexpr float tolerance = TOLERANCE;
+	constexpr size_t nrepeats = NREPEATS;
+	constexpr size_t warmup = WARMUP;
 
 	float* A, * B, * C, * REF;
 	MallocMatrix(M, N, K, A, B, C, REF);
@@ -71,6 +75,27 @@ void Test(size_t M, size_t N, size_t K, unsigned int version)
 	FreeMatrix(A, B, C, REF);
 }
 
+void Run(size_t M, size_t N, size_t K, unsigned int version)
+{
+	constexpr size_t totalVersions = sizeof(matmulFuncs) / sizeof(matmulFuncs[0]);
+	if (version >= totalVersions) version = totalVersions - 1;
+
+	MatMulFunc f{ matmulFuncs[version] };
+
+	constexpr size_t nrepeats = NREPEATS;
+
+	float* A, * B, * C, * REF;
+	MallocMatrix(M, N, K, A, B, C, REF);
+
+	InitABCREF(M, N, K, A, B, C, REF);
+
+	for (size_t i = 0; i < nrepeats; ++i) {
+		f(M, N, K, A, B, C);
+	}
+
+	FreeMatrix(A, B, C, REF);
+}
+
 int main(int argc, char* argv[])
 {
 	size_t M, N, K;
@@ -97,5 +122,10 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+#ifdef PROFILE
+	Run(M, N, K, version);
+#else
 	Test(M, N, K, version);
+#endif
+	return 0;
 }

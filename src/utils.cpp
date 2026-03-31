@@ -10,27 +10,27 @@ using std::mt19937;
 using std::random_device;
 using std::uniform_real_distribution;
 
-void MallocMatrix(size_t M, size_t N, size_t K, float*& A, float*& B, float*& C, float*& REF)
+void MallocMatrix(const size_t M, const size_t N, const size_t K, float*& A, float*& B, float*& C, float*& REF)
 {
-	A = (float*)malloc(sizeof(float) * M * K);
-	B = (float*)malloc(sizeof(float) * K * N);
-	C = (float*)malloc(sizeof(float) * M * N);
-	REF = (float*)malloc(sizeof(float) * M * N);
+	A = (float*)_aligned_malloc(sizeof(float) * M * K, 32);
+	B = (float*)_aligned_malloc(sizeof(float) * K * N, 32);
+	C = (float*)_aligned_malloc(sizeof(float) * M * N, 32);
+	REF = (float*)_aligned_malloc(sizeof(float) * M * N, 32);
 }
 
 void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
 {
-	free(A);
-	free(B);
-	free(C);
-	free(REF);
+	_aligned_free(A);
+	_aligned_free(B);
+	_aligned_free(C);
+	_aligned_free(REF);
 	A = nullptr;
 	B = nullptr;
 	C = nullptr;
 	REF = nullptr;
 }
 
-void InitABCREF(size_t M, size_t N, size_t K, float* A, float* B, float* C, float* REF)
+void InitABCREF(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C, float* REF)
 {
 	mt19937 engine(random_device{}());
 	uniform_real_distribution<float> dist(0.0f, 1.0f);
@@ -43,7 +43,7 @@ void InitABCREF(size_t M, size_t N, size_t K, float* A, float* B, float* C, floa
 	fill(REF, REF + M * N, 0);
 }
 
-void PrintABC(size_t M, size_t N, size_t K, float* A, float* B, float* C)
+void PrintABC(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	cout << "Matrix A:" << endl;
 	for (size_t i = 0; i < M; i++)
@@ -70,7 +70,7 @@ void PrintABC(size_t M, size_t N, size_t K, float* A, float* B, float* C)
 	}
 }
 
-void CheckResult(size_t M, size_t N, float* C, float* REF, float tolerance)
+void CheckResult(const size_t M, const size_t N, float* C, float* REF, float tolerance)
 {
 	for (size_t i = 0; i < M; i++)
 		for (size_t j = 0; j < N; j++) 
