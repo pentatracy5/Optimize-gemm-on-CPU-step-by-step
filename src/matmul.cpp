@@ -64,7 +64,7 @@ void MatMulREF(const size_t M, const size_t N, const size_t K, float* A, float* 
 }
 
 // 朴素实现，循环顺序ijk
-void MatMul0(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul00(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	for (size_t i = 0; i < M; i++)
 		for (size_t j = 0; j < N; j++)
@@ -74,7 +74,7 @@ void MatMul0(const size_t M, const size_t N, const size_t K, float* A, float* B,
 
 // 访存更加友好的朴素实现，循环顺序ikj
 // 由于ABC都是row major的，因此ikj的循环顺序对ABC的访问都是连续的
-void MatMul1(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul01(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	for (size_t i = 0; i < M; i++)
 		for (size_t k = 0; k < K; k++)
@@ -96,7 +96,7 @@ void MatMul1(const size_t M, const size_t N, const size_t K, float* A, float* B,
 // 我们尽量确保
 // (Nblock + 1 + Nblock) * 4 < L1 cache size，
 // 最终选取Nblock = 3072
-void MatMul2(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul02(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t Nblock = GEMM_Nblock;
 	for (size_t j = 0; j < N; j += Nblock)
@@ -121,7 +121,7 @@ void MatMul2(const size_t M, const size_t N, const size_t K, float* A, float* B,
 // 我们尽量确保
 // (Nblock + Kblock + Kblock * Nblock) * 4 < L2 cache size，
 // 最终选取Kblock = 160
-void MatMul3(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul03(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t Kblock = GEMM_Kblock;
 	constexpr size_t Nblock = GEMM_Nblock;
@@ -149,7 +149,7 @@ void MatMul3(const size_t M, const size_t N, const size_t K, float* A, float* B,
 // 我们尽量确保
 // (Mblock * Nblock + Mblock * Kblock + Kblock * Nblock) * 4 < L3 cache size，
 // 最终选取Mblock = 2048
-void MatMul4(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul04(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t Mblock = GEMM_Mblock;
 	constexpr size_t Kblock = GEMM_Kblock;
@@ -164,7 +164,7 @@ void MatMul4(const size_t M, const size_t N, const size_t K, float* A, float* B,
 }
 
 // 三层tiling，循环顺序ikjikj，并且使用intrinsic指令进行向量化
-void MatMul5(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul05(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t Mblock = GEMM_Mblock;
 	constexpr size_t Kblock = GEMM_Kblock;
@@ -246,7 +246,7 @@ void MatMul5(const size_t M, const size_t N, const size_t K, float* A, float* B,
 //					C（MR * NR）= A_k（MR * 1）* B_k（1 * NR）
 // 
 // 的循环之外，我们再套上一个j的循环和一个i的循环，完成对整个矩阵的计算。
-void MatMul6(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul06(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t NC = GEMM_NC;
 	constexpr size_t MC = GEMM_MC;
@@ -305,7 +305,7 @@ void MatMul6(const size_t M, const size_t N, const size_t K, float* A, float* B,
 // 在MatMul6的基础上增加了对A和B的pack，使得内存访问更加连续
 // pack的时机是 jik -> packA -> packB -> jik，这里将pack之后的循环过程称为Macro Kernel层次
 // 时机的选取并没有经过验证
-void MatMul7(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul07(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t NC = GEMM_NC;
 	constexpr size_t MC = GEMM_MC;
@@ -370,7 +370,7 @@ void MatMul7(const size_t M, const size_t N, const size_t K, float* A, float* B,
 // 在MatMul7的基础上调整了循环以及pack的顺序，节省了packB的次数，
 // tradeoff是从复用C（MC * NC）变为复用B（KC * NC），复用的tile的尺寸变小
 // pack的时机是 jk -> packB -> i -> packA -> jik
-void MatMul8(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul08(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t NC = GEMM_NC;
 	constexpr size_t MC = GEMM_MC;
@@ -437,7 +437,7 @@ void MatMul8(const size_t M, const size_t N, const size_t K, float* A, float* B,
 // 从硬件层面来说，i7-13700KF的不同核心之间的L2 cache不共享（除了每两个E core共享4MB L2 cache的情况）
 // 而算法设计的目的就是让APanel铺满L2 cache，所以我们选择packA的时机开启OpenMP多线程
 // 在这之前，我们对packB的过程开启多线程，也能提高硬件资源的利用率
-void MatMul9(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void MatMul09(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t NC = GEMM_NC_OMP;
 	constexpr size_t MC = GEMM_MC;

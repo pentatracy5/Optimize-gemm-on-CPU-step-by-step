@@ -4,24 +4,24 @@ typedef void (*MatMulFunc)(const size_t M, const size_t N, const size_t K, float
 
 void MatMulREF(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul0(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul00(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul1(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul01(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul2(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul02(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul3(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul03(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul4(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C); 
+void MatMul04(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C); 
 
-void MatMul5(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul05(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul6(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul06(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul7(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul07(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul8(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul08(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-void MatMul9(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+void MatMul09(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-static const MatMulFunc matmulFuncs[] = { MatMul0, MatMul1, MatMul2, MatMul3, MatMul4, MatMul5, MatMul6, MatMul7, MatMul8, MatMul9 };
+static const MatMulFunc matmulFuncs[] = { MatMul00, MatMul01, MatMul02, MatMul03, MatMul04, MatMul05, MatMul06, MatMul07, MatMul08, MatMul09 };
