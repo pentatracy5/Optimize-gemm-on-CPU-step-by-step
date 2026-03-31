@@ -506,3 +506,73 @@ void MatMul09(const size_t M, const size_t N, const size_t K, float* A, float* B
 	_aligned_free(APanel);
 	_aligned_free(BPanel);
 }
+
+void MatMul10(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+{
+	constexpr size_t NC = 192;
+	constexpr size_t MC = 768;
+	constexpr size_t KC = 160;
+	constexpr size_t NR = 24;
+	constexpr size_t MR = 4;
+	constexpr size_t nr = NR / 8;
+	float* macroB;
+	float* APanel = (float*)_aligned_malloc(sizeof(float) * MC * KC * OMP_THREADS, 32);
+	float* BPanel = (float*)_aligned_malloc(sizeof(float) * KC * NC, 32);
+	for (size_t jc = 0; jc < N; jc += NC)
+	{
+		for (size_t pc = 0; pc < K; pc += KC)
+		{
+			macroB = B + pc * N + jc;
+			PackB(N, KC, NC, NR, macroB, BPanel);
+
+			#pragma omp parallel num_threads(OMP_THREADS)
+			{
+				float* macroA, * macroC;
+				float* microA, * microB, * microC;
+				size_t range = M / omp_get_num_threads();
+				size_t tid = omp_get_thread_num();
+				size_t start = tid * range;
+				size_t end = start + range;
+				for (size_t ic = start; ic < end; ic += MC)
+				{
+					macroA = A + ic * K + pc;
+					macroC = C + ic * N + jc;
+					PackA(K, MC, KC, MR, macroA, APanel + tid * MC * KC);
+					//Macro Kernel
+					for (size_t jr = 0; jr < NC; jr += NR)
+					{
+						microB = BPanel + jr * KC;
+						for (size_t ir = 0; ir < MC; ir += MR)
+						{
+							microA = APanel + tid * MC * KC + ir * KC;
+							microC = macroC + ir * N + jr;
+							//Micro Kernel
+							__m256 c[MR][nr];
+							for (size_t i = 0; i < MR; i++)
+								for (size_t l = 0; l < nr; l++)
+									c[i][l] = _mm256_load_ps(microC + i * N + l * 8);
+							__m256 b[nr];
+							for (size_t kr = 0; kr < KC; kr++)
+							{
+								for (size_t l = 0; l < nr; l++)
+									b[l] = _mm256_load_ps(microB + kr * NR + l * 8);
+
+								for (size_t i = 0; i < MR; i++)
+								{
+									__m256 a = _mm256_set1_ps(microA[kr * MR + i]);
+									for (size_t l = 0; l < nr; l++)
+										c[i][l] = _mm256_fmadd_ps(a, b[l], c[i][l]);
+								}
+							}
+							for (size_t i = 0; i < MR; i++)
+								for (size_t l = 0; l < nr; l++)
+									_mm256_store_ps(microC + i * N + l * 8, c[i][l]);
+						}
+					}
+				}
+			}
+		}
+	}
+	_aligned_free(APanel);
+	_aligned_free(BPanel);
+}

@@ -1,7 +1,6 @@
 ﻿#include <iostream>
 #include <sstream>
 #include <chrono>
-#include <vector>
 #include <utils.h>
 #include <matmul.h>
 #include <config.h>
@@ -10,17 +9,6 @@ using std::cout;
 using std::endl;
 using std::istringstream;
 using std::cerr;
-using std::vector;
-
-vector<int> v;
-void ClearCache()
-{
-	constexpr size_t cache_size = 32 * 1024 * 1024;
-	constexpr size_t num_elements = cache_size / sizeof(int);
-	v.resize(num_elements, 0);
-	for (size_t i = 0; i < num_elements; i++)
-		v[i] = i;
-}
 
 void Test(size_t M, size_t N, size_t K, unsigned int version)
 {

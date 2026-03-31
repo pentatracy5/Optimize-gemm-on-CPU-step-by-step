@@ -24,4 +24,6 @@ void MatMul08(const size_t M, const size_t N, const size_t K, float* A, float* B
 
 void MatMul09(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
 
-static const MatMulFunc matmulFuncs[] = { MatMul00, MatMul01, MatMul02, MatMul03, MatMul04, MatMul05, MatMul06, MatMul07, MatMul08, MatMul09 };
+void MatMul10(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C);
+
+static const MatMulFunc matmulFuncs[] = { MatMul00, MatMul01, MatMul02, MatMul03, MatMul04, MatMul05, MatMul06, MatMul07, MatMul08, MatMul09, MatMul10 };

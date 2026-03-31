@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <vector>
 
 using std::fill;
 using std::cout;
@@ -9,6 +10,17 @@ using std::endl;
 using std::mt19937;
 using std::random_device;
 using std::uniform_real_distribution;
+using std::vector;
+
+vector<int> v;
+void ClearCache()
+{
+	constexpr size_t cache_size = 32 * 1024 * 1024;
+	constexpr size_t num_elements = cache_size / sizeof(int);
+	v.resize(num_elements, 0);
+	for (size_t i = 0; i < num_elements; i++)
+		v[i] = i;
+}
 
 void MallocMatrix(const size_t M, const size_t N, const size_t K, float*& A, float*& B, float*& C, float*& REF)
 {

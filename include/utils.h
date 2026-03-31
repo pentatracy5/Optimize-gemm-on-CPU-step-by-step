@@ -1,5 +1,7 @@
 #pragma once
 
+void ClearCache();
+
 void MallocMatrix(const size_t M, const size_t N, const size_t K, float*& A, float*& B, float*& C, float*& REF);
 
 void FreeMatrix(float*& A, float*& B, float*& C, float*& REF);
