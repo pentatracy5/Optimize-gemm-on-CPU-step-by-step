@@ -83,7 +83,7 @@ void MatMul01(const size_t M, const size_t N, const size_t K, float* A, float* B
 }
 
 // 单层tiling，循环顺序jikj
-// 按照输入矩阵的大小（M = 4096, N = 12288, K = 640），在ikj外增加一层j的tiling
+// 按照输入矩阵的大小（M = 9216, N = 12288, K = 640），在ikj外增加一层j的tiling
 // 由于i7-13700KF的L1 cache的大小为48KB（P core）/ 32KB（E core），为了保证
 // 
 //	for (size_t i = 0; i < M; i++)
@@ -107,7 +107,7 @@ void MatMul02(const size_t M, const size_t N, const size_t K, float* A, float* B
 }
 
 // 双层tiling，循环顺序kjikj
-// 按照输入矩阵的大小（M = 4096, N = 12288, K = 640），在jikj外增加一层k的tiling
+// 按照输入矩阵的大小（M = 9216, N = 12288, K = 640），在jikj外增加一层k的tiling
 // 由于i7-13700KF的L2 cache的大小为2MB（P core）/ 4MB（两个E core共享），为了保证
 // 
 //	for (size_t j = 0; j < N; j += Nblock)
@@ -134,7 +134,7 @@ void MatMul03(const size_t M, const size_t N, const size_t K, float* A, float* B
 }
 
 // 三层tiling，循环顺序ikjikj
-// 按照输入矩阵的大小（M = 4096, N = 12288, K = 640），在kjikj外增加一层i的tiling
+// 按照输入矩阵的大小（M = 9216, N = 12288, K = 640），在kjikj外增加一层i的tiling
 // 由于i7-13700KF的L3 cache的大小为30MB（所有core共享），为了保证
 // 
 //	for (size_t k = 0; k < K; k += Kblock)
@@ -440,10 +440,10 @@ void MatMul08(const size_t M, const size_t N, const size_t K, float* A, float* B
 void MatMul09(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
 {
 	constexpr size_t NC = GEMM_NC_OMP;
-	constexpr size_t MC = GEMM_MC;
-	constexpr size_t KC = GEMM_KC;
-	constexpr size_t NR = GEMM_NR;
-	constexpr size_t MR = GEMM_MR;
+	constexpr size_t MC = GEMM_MC_OMP;
+	constexpr size_t KC = GEMM_KC_OMP;
+	constexpr size_t NR = GEMM_NR_OMP;
+	constexpr size_t MR = GEMM_MR_OMP;
 	constexpr size_t nr = NR / 8;
 	float* macroB;
 	float* APanel = (float*)_aligned_malloc(sizeof(float) * MC * KC * OMP_THREADS, 32);
