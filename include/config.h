@@ -1,7 +1,7 @@
 #pragma once
 
 #define NREPEATS 128
-#define TOLERANCE (1e-1 * NREPEATS)
+#define TOLERANCE (8e-2 * NREPEATS)
 #define WARMUP 2
 
 #define GEMM_Mblock 2048

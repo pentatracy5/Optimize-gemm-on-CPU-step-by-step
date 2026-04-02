@@ -10,31 +10,31 @@ using std::endl;
 using std::istringstream;
 using std::cerr;
 
-void Test(size_t M, size_t N, size_t K, unsigned int version)
+void Test(int M, int N, int K, unsigned int version)
 {
-	constexpr size_t totalVersions = sizeof(matmulFuncs) / sizeof(matmulFuncs[0]);
+	constexpr int totalVersions = sizeof(matmulFuncs) / sizeof(matmulFuncs[0]);
 	if (version >= totalVersions) version = totalVersions - 1;
 
 	MatMulFunc f{ matmulFuncs[version] };
 	MatMulFunc ref{ MatMulREF };
 
 	constexpr float tolerance = TOLERANCE;
-	constexpr size_t nrepeats = NREPEATS;
-	constexpr size_t warmup = WARMUP;
+	constexpr int nrepeats = NREPEATS;
+	constexpr int warmup = WARMUP;
 
 	float* A, * B, * C, * REF;
-	size_t lda, ldb, ldc;
+	int lda, ldb, ldc;
 	MallocMatrix(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
 	InitABCREF(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
-	for (size_t i = 0; i < warmup; ++i) {
+	for (int i = 0; i < warmup; ++i) {
 		ref(M, N, K, lda, ldb, ldc, A, B, REF);
 		f(M, N, K, lda, ldb, ldc, A, B, C);
 	}
 
 	std::chrono::duration<double> elapsed(0);
-	for (size_t i = 0; i < nrepeats; i++)
+	for (int i = 0; i < nrepeats; i++)
 	{
 		ClearCache();
 		auto start = std::chrono::high_resolution_clock::now();
@@ -45,7 +45,7 @@ void Test(size_t M, size_t N, size_t K, unsigned int version)
 	double time_ref = elapsed.count() / nrepeats;
 
 	elapsed = std::chrono::duration<double>::zero();
-	for (size_t i = 0; i < nrepeats; i++)
+	for (int i = 0; i < nrepeats; i++)
 	{
 		ClearCache();
 		auto start = std::chrono::high_resolution_clock::now();
@@ -64,22 +64,22 @@ void Test(size_t M, size_t N, size_t K, unsigned int version)
 	FreeMatrix(A, B, C, REF);
 }
 
-void Run(size_t M, size_t N, size_t K, unsigned int version)
+void Run(int M, int N, int K, unsigned int version)
 {
-	constexpr size_t totalVersions = sizeof(matmulFuncs) / sizeof(matmulFuncs[0]);
+	constexpr int totalVersions = sizeof(matmulFuncs) / sizeof(matmulFuncs[0]);
 	if (version >= totalVersions) version = totalVersions - 1;
 
 	MatMulFunc f{ matmulFuncs[version] };
 
-	constexpr size_t nrepeats = NREPEATS;
+	constexpr int nrepeats = NREPEATS;
 
 	float* A, * B, * C, * REF;
-	size_t lda, ldb, ldc;
+	int lda, ldb, ldc;
 	MallocMatrix(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
 	InitABCREF(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
-	for (size_t i = 0; i < nrepeats; ++i) {
+	for (int i = 0; i < nrepeats; ++i) {
 		f(M, N, K, lda, ldb, ldc, A, B, C);
 	}
 
@@ -88,7 +88,7 @@ void Run(size_t M, size_t N, size_t K, unsigned int version)
 
 int main(int argc, char* argv[])
 {
-	size_t M, N, K;
+	int M, N, K;
 	unsigned int version;
 	if (argc != 5)
 	{
