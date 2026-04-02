@@ -23,15 +23,16 @@ void ClearCache()
 		v[i] = i;
 }
 
-size_t MallocMatrix(const size_t M, const size_t N, const size_t K, float*& A, float*& B, float*& C, float*& REF)
+void MallocMatrix(const size_t M, const size_t N, const size_t K, size_t& lda, size_t& ldb, size_t& ldc, float*& A, float*& B, float*& C, float*& REF)
 {
 	A = (float*)_aligned_malloc(sizeof(float) * M * K, 32);
 	B = (float*)_aligned_malloc(sizeof(float) * K * N, 32);
+	lda = K;
+	ldb = N;
+	ldc = ((N - 1) / GEMM_NR + 1) * GEMM_NR;
 	size_t m = ((M - 1) / GEMM_MR + 1) * GEMM_MR;
-	size_t ldc = ((N - 1) / GEMM_NR + 1) * GEMM_NR;
 	C = (float*)_aligned_malloc(sizeof(float) * m * ldc, 32);
 	REF = (float*)_aligned_malloc(sizeof(float) * m * ldc, 32);
-	return ldc;
 }
 
 void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
@@ -46,26 +47,26 @@ void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
 	REF = nullptr;
 }
 
-void InitABCREF(const size_t M, const size_t N, const size_t K, const size_t ldc, float* A, float* B, float* C, float* REF)
+void InitABCREF(const size_t M, const size_t N, const size_t K, const size_t lda, const size_t ldb, const size_t ldc, float* A, float* B, float* C, float* REF)
 {
 	mt19937 engine(random_device{}());
 	uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-	for (size_t i = 0; i < M * K; i++)
+	for (size_t i = 0; i < M * lda; i++)
 		A[i] = dist(engine);
-	for (size_t i = 0; i < K * N; i++)
+	for (size_t i = 0; i < K * ldb; i++)
 		B[i] = dist(engine);
 	fill(C, C + M * ldc, 0);
 	fill(REF, REF + M * ldc, 0);
 }
 
-void PrintABC(const size_t M, const size_t N, const size_t K, const size_t ldc, float* A, float* B, float* C)
+void PrintABC(const size_t M, const size_t N, const size_t K, const size_t lda, const size_t ldb, const size_t ldc, float* A, float* B, float* C)
 {
 	cout << "Matrix A:" << endl;
 	for (size_t i = 0; i < M; i++)
 	{
 		for (size_t k = 0; k < K; k++)
-			cout << A[i * K + k] << " ";
+			cout << A[i * lda + k] << " ";
 		cout << endl;
 	}
 
@@ -73,7 +74,7 @@ void PrintABC(const size_t M, const size_t N, const size_t K, const size_t ldc, 
 	for (size_t k = 0; k < K; k++)
 	{
 		for (size_t j = 0; j < N; j++)
-			cout << B[k * N + j] << " ";
+			cout << B[k * ldb + j] << " ";
 		cout << endl;
 	}
 

@@ -23,13 +23,14 @@ void Test(size_t M, size_t N, size_t K, unsigned int version)
 	constexpr size_t warmup = WARMUP;
 
 	float* A, * B, * C, * REF;
-	const size_t ldc = MallocMatrix(M, N, K, A, B, C, REF);
+	size_t lda, ldb, ldc;
+	MallocMatrix(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
-	InitABCREF(M, N, K, ldc, A, B, C, REF);
+	InitABCREF(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
 	for (size_t i = 0; i < warmup; ++i) {
-		ref(M, N, K, ldc, A, B, REF);
-		f(M, N, K, ldc, A, B, C);
+		ref(M, N, K, lda, ldb, ldc, A, B, REF);
+		f(M, N, K, lda, ldb, ldc, A, B, C);
 	}
 
 	std::chrono::duration<double> elapsed(0);
@@ -37,7 +38,7 @@ void Test(size_t M, size_t N, size_t K, unsigned int version)
 	{
 		ClearCache();
 		auto start = std::chrono::high_resolution_clock::now();
-		ref(M, N, K, ldc, A, B, REF);
+		ref(M, N, K, lda, ldb, ldc, A, B, REF);
 		auto end = std::chrono::high_resolution_clock::now();
 		elapsed += end - start;
 	}
@@ -48,7 +49,7 @@ void Test(size_t M, size_t N, size_t K, unsigned int version)
 	{
 		ClearCache();
 		auto start = std::chrono::high_resolution_clock::now();
-		f(M, N, K, ldc, A, B, C);
+		f(M, N, K, lda, ldb, ldc, A, B, C);
 		auto end = std::chrono::high_resolution_clock::now();
 		elapsed += end - start;
 	}
@@ -73,12 +74,13 @@ void Run(size_t M, size_t N, size_t K, unsigned int version)
 	constexpr size_t nrepeats = NREPEATS;
 
 	float* A, * B, * C, * REF;
-	const size_t ldc = MallocMatrix(M, N, K, A, B, C, REF);
+	size_t lda, ldb, ldc;
+	MallocMatrix(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
-	InitABCREF(M, N, K, ldc, A, B, C, REF);
+	InitABCREF(M, N, K, lda, ldb, ldc, A, B, C, REF);
 
 	for (size_t i = 0; i < nrepeats; ++i) {
-		f(M, N, K, ldc, A, B, C);
+		f(M, N, K, lda, ldb, ldc, A, B, C);
 	}
 
 	FreeMatrix(A, B, C, REF);
