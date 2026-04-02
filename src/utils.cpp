@@ -1,3 +1,4 @@
+#include <config.h>
 #include <utils.h>
 #include <algorithm>
 #include <iostream>
@@ -22,12 +23,15 @@ void ClearCache()
 		v[i] = i;
 }
 
-void MallocMatrix(const size_t M, const size_t N, const size_t K, float*& A, float*& B, float*& C, float*& REF)
+size_t MallocMatrix(const size_t M, const size_t N, const size_t K, float*& A, float*& B, float*& C, float*& REF)
 {
 	A = (float*)_aligned_malloc(sizeof(float) * M * K, 32);
 	B = (float*)_aligned_malloc(sizeof(float) * K * N, 32);
-	C = (float*)_aligned_malloc(sizeof(float) * M * N, 32);
-	REF = (float*)_aligned_malloc(sizeof(float) * M * N, 32);
+	size_t m = ((M - 1) / GEMM_MR + 1) * GEMM_MR;
+	size_t ldc = ((N - 1) / GEMM_NR + 1) * GEMM_NR;
+	C = (float*)_aligned_malloc(sizeof(float) * m * ldc, 32);
+	REF = (float*)_aligned_malloc(sizeof(float) * m * ldc, 32);
+	return ldc;
 }
 
 void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
@@ -42,7 +46,7 @@ void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
 	REF = nullptr;
 }
 
-void InitABCREF(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C, float* REF)
+void InitABCREF(const size_t M, const size_t N, const size_t K, const size_t ldc, float* A, float* B, float* C, float* REF)
 {
 	mt19937 engine(random_device{}());
 	uniform_real_distribution<float> dist(0.0f, 1.0f);
@@ -51,11 +55,11 @@ void InitABCREF(const size_t M, const size_t N, const size_t K, float* A, float*
 		A[i] = dist(engine);
 	for (size_t i = 0; i < K * N; i++)
 		B[i] = dist(engine);
-	fill(C, C + M * N, 0);
-	fill(REF, REF + M * N, 0);
+	fill(C, C + M * ldc, 0);
+	fill(REF, REF + M * ldc, 0);
 }
 
-void PrintABC(const size_t M, const size_t N, const size_t K, float* A, float* B, float* C)
+void PrintABC(const size_t M, const size_t N, const size_t K, const size_t ldc, float* A, float* B, float* C)
 {
 	cout << "Matrix A:" << endl;
 	for (size_t i = 0; i < M; i++)
@@ -77,18 +81,18 @@ void PrintABC(const size_t M, const size_t N, const size_t K, float* A, float* B
 	for (size_t i = 0; i < M; i++)
 	{
 		for (size_t j = 0; j < N; j++)
-			cout << C[i * N + j] << " ";
+			cout << C[i * ldc + j] << " ";
 		cout << endl;
 	}
 }
 
-void CheckResult(const size_t M, const size_t N, float* C, float* REF, float tolerance)
+void CheckResult(const size_t M, const size_t N, const size_t ldc, float* C, float* REF, float tolerance)
 {
 	for (size_t i = 0; i < M; i++)
 		for (size_t j = 0; j < N; j++) 
-			if (fabs(C[i * N + j] - REF[i * N + j]) > tolerance)
+			if (fabs(C[i * ldc + j] - REF[i * ldc + j]) > tolerance)
 			{
-				cout << "Error: C(" << i << ", " << j << ") = " << C[i * N + j] << ", but expected " << REF[i * N + j] << endl;
+				cout << "Error: C(" << i << ", " << j << ") = " << C[i * ldc + j] << ", but expected " << REF[i * ldc + j] << endl;
 				return;
 			}
 	cout << "Check passed!" << endl;
