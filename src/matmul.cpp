@@ -42,7 +42,7 @@ using std::min;
  * @warning 函数假设 A 以行优先存储，且子矩阵的列索引从 0 开始。
  *          如果实际子矩阵列偏移不为 0，调用前需将 A 指针调整到正确位置。
  */
-void PackA(const int lda, const int MC, const int KC, const int MR, float* A, float* APanel)
+inline void PackA(const int lda, const int MC, const int KC, const int MR, float* A, float* APanel)
 {
 	for (int i = 0; i < MC; i += MR)
 	{
@@ -106,7 +106,7 @@ void PackA(const int lda, const int MC, const int KC, const int MR, float* A, fl
  * @note 若启用 OpenMP（定义 USE_OMP），外层循环会被并行化，
  *       每个线程处理一组列块，从而加速大数据量打包。
  */
-void PackB(const int ldb, const int KC, const int NC, const int NR, float* B, float* BPanel)
+inline void PackB(const int ldb, const int KC, const int NC, const int NR, float* B, float* BPanel)
 {
 	#pragma omp parallel for num_threads(OMP_THREADS)
 	for (int j = 0; j < NC; j += NR)
