@@ -1,7 +1,11 @@
 #pragma once
 
-#define USE_OMP
+constexpr bool PROFILE = true;
+constexpr int WARMUP = 2;
+constexpr int NREPEATS = PROFILE ? 128 : 2;
+constexpr float TOLERANCE = 0.08f * NREPEATS;
 
+#define USE_OMP
 #ifdef USE_OMP
 
 constexpr int OMP_THREADS = 16;
@@ -58,8 +62,3 @@ constexpr int GEMM_MC = 320 * GEMM_MR; // 1280
 constexpr int GEMM_NC = 64 * GEMM_NR; // 1536
 
 #endif
-
-constexpr bool PROFILE = true;
-constexpr int WARMUP = 2;
-constexpr int NREPEATS = PROFILE ? 128 : 2;
-constexpr float TOLERANCE = 0.08f * NREPEATS;
