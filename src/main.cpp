@@ -112,10 +112,10 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-#ifdef PROFILE
-	Run(M, N, K, version);
-#else
-	Test(M, N, K, version);
-#endif
+	if constexpr (PROFILE)
+		Run(M, N, K, version);
+	else
+		Test(M, N, K, version);
+
 	return 0;
 }
