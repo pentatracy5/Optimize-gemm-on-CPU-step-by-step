@@ -809,7 +809,7 @@ void MatMul10(const int M, const int N, const int K, const int lda, const int ld
 							//Micro Kernel
 							__m256 c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, c50, c51;
 							__m256 b0, b1;
-							__m256 a;
+							__m256 aping, apong;
 
 							c00 = _mm256_load_ps(microC);
 							c01 = _mm256_load_ps(microC + 8);
@@ -834,29 +834,32 @@ void MatMul10(const int M, const int N, const int K, const int lda, const int ld
 								b0 = _mm256_load_ps(microB + kr * NR);
 								b1 = _mm256_load_ps(microB + kr * NR + 8);
 
-								a = _mm256_broadcast_ss(microA + kr * 6);
-								c00 = _mm256_fmadd_ps(a, b0, c00);
-								c01 = _mm256_fmadd_ps(a, b1, c01);
+								aping = _mm256_broadcast_ss(microA + kr * 6);
+								apong = _mm256_broadcast_ss(microA + kr * 6 + 1);
+								
+								c00 = _mm256_fmadd_ps(aping, b0, c00);
+								c01 = _mm256_fmadd_ps(aping, b1, c01);
 
-								a = _mm256_broadcast_ss(microA + kr * 6 + 1);
-								c10 = _mm256_fmadd_ps(a, b0, c10);
-								c11 = _mm256_fmadd_ps(a, b1, c11);
+								c10 = _mm256_fmadd_ps(apong, b0, c10);
+								c11 = _mm256_fmadd_ps(apong, b1, c11);
 
-								a = _mm256_broadcast_ss(microA + kr * 6 + 2);
-								c20 = _mm256_fmadd_ps(a, b0, c20);
-								c21 = _mm256_fmadd_ps(a, b1, c21);
+								aping = _mm256_broadcast_ss(microA + kr * 6 + 2);
+								apong = _mm256_broadcast_ss(microA + kr * 6 + 3);
+								
+								c20 = _mm256_fmadd_ps(aping, b0, c20);
+								c21 = _mm256_fmadd_ps(aping, b1, c21);
 
-								a = _mm256_broadcast_ss(microA + kr * 6 + 3);
-								c30 = _mm256_fmadd_ps(a, b0, c30);
-								c31 = _mm256_fmadd_ps(a, b1, c31);
+								c30 = _mm256_fmadd_ps(apong, b0, c30);
+								c31 = _mm256_fmadd_ps(apong, b1, c31);
 
-								a = _mm256_broadcast_ss(microA + kr * 6 + 4);
-								c40 = _mm256_fmadd_ps(a, b0, c40);
-								c41 = _mm256_fmadd_ps(a, b1, c41);
+								aping = _mm256_broadcast_ss(microA + kr * 6 + 4);
+								apong = _mm256_broadcast_ss(microA + kr * 6 + 5);
+								
+								c40 = _mm256_fmadd_ps(aping, b0, c40);
+								c41 = _mm256_fmadd_ps(aping, b1, c41);
 
-								a = _mm256_broadcast_ss(microA + kr * 6 + 5);
-								c50 = _mm256_fmadd_ps(a, b0, c50);
-								c51 = _mm256_fmadd_ps(a, b1, c51);
+								c50 = _mm256_fmadd_ps(apong, b0, c50);
+								c51 = _mm256_fmadd_ps(apong, b1, c51);
 							}
 
 							_mm256_store_ps(microC, c00);

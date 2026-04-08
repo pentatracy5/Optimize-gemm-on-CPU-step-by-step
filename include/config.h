@@ -11,28 +11,28 @@ constexpr float TOLERANCE = 0.08f * NREPEATS;
 
 constexpr int OMP_THREADS = 16;
 
-//for MatMul09 (v0) (blis version)
+// for MatMul09 - MatMul10 (v0) (blis version)
 //constexpr int GEMM_NR = 24;
 //constexpr int GEMM_MR = 4;
 //constexpr int GEMM_KC = 256;
 //constexpr int GEMM_MC = 32 * GEMM_MR; // 128
 //constexpr int GEMM_NC = 11 * GEMM_NR; // 264
 
-//for MatMul09 (v1)
+// for MatMul09 - MatMul10 (v1)
 //constexpr int GEMM_NR = 24;
 //constexpr int GEMM_MR = 4;
 //constexpr int GEMM_KC = 240;
 //constexpr int GEMM_MC = 48 * GEMM_MR; // 192
 //constexpr int GEMM_NC = 40 * GEMM_NR; // 960
 
-//for MatMul09 (v2) (blis version)
+// for MatMul09 - MatMul10 (v2) (blis version)
 //constexpr int GEMM_NR = 16;
 //constexpr int GEMM_MR = 6;
 //constexpr int GEMM_KC = 256;
 //constexpr int GEMM_MC = 24 * GEMM_MR; // 144
 //constexpr int GEMM_NC = 255 * GEMM_NR; // 4080
 
-//for MatMul09 (v3)
+// for MatMul09 - MatMul10 (v3)
 constexpr int GEMM_NR = 16;
 constexpr int GEMM_MR = 6;
 constexpr int GEMM_KC = 256;
