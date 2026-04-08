@@ -19,8 +19,7 @@ void ClearCache()
 	constexpr int cache_size = 32 * 1024 * 1024;
 	constexpr int num_elements = cache_size / sizeof(int);
 	v.resize(num_elements, 0);
-	for (int i = 0; i < num_elements; i++)
-		v[i] = i;
+	std::fill(v.begin(), v.end(), 0);
 }
 
 void MallocMatrix(const int M, const int N, const int K, int& lda, int& ldb, int& ldc, float*& A, float*& B, float*& C, float*& REF)

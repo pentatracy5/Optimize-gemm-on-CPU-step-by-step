@@ -108,9 +108,7 @@ void PackA(const int lda, const int MC, const int KC, const int MR, float* A, fl
  */
 void PackB(const int ldb, const int KC, const int NC, const int NR, float* B, float* BPanel)
 {
-#ifdef USE_OMP
 	#pragma omp parallel for num_threads(OMP_THREADS)
-#endif
 	for (int j = 0; j < NC; j += NR)
 	{
 		int currentNR = min(NR, NC - j);
@@ -190,7 +188,7 @@ void MatMul01(const int M, const int N, const int K, const int lda, const int ld
  */
 void MatMul02(const int M, const int N, const int K, const int lda, const int ldb, const int ldc, float* A, float* B, float* C)
 {
-	constexpr int Nblock = GEMM_Nblock;
+	constexpr int Nblock = GEMM_NC;
 	int currentNblock;
 	for (int j = 0; j < N; j += Nblock)
 	{
@@ -215,8 +213,8 @@ void MatMul02(const int M, const int N, const int K, const int lda, const int ld
  */
 void MatMul03(const int M, const int N, const int K, const int lda, const int ldb, const int ldc, float* A, float* B, float* C)
 {
-	constexpr int Kblock = GEMM_Kblock;
-	constexpr int Nblock = GEMM_Nblock;
+	constexpr int Kblock = GEMM_KC;
+	constexpr int Nblock = GEMM_NC;
 	int currentKblock, currentNblock;
 	for (int k = 0; k < K; k += Kblock)
 	{
@@ -245,9 +243,9 @@ void MatMul03(const int M, const int N, const int K, const int lda, const int ld
  */
 void MatMul04(const int M, const int N, const int K, const int lda, const int ldb, const int ldc, float* A, float* B, float* C)
 {
-	constexpr int Mblock = GEMM_Mblock;
-	constexpr int Kblock = GEMM_Kblock;
-	constexpr int Nblock = GEMM_Nblock;
+	constexpr int Mblock = GEMM_MC;
+	constexpr int Kblock = GEMM_KC;
+	constexpr int Nblock = GEMM_NC;
 	int currentMblock, currentKblock, currentNblock;
 	for (int i = 0; i < M; i += Mblock)
 	{
@@ -283,9 +281,9 @@ void MatMul04(const int M, const int N, const int K, const int lda, const int ld
  */
 void MatMul05(const int M, const int N, const int K, const int lda, const int ldb, const int ldc, float* A, float* B, float* C)
 {
-	constexpr int Mblock = GEMM_Mblock;
-	constexpr int Kblock = GEMM_Kblock;
-	constexpr int Nblock = GEMM_Nblock;
+	constexpr int Mblock = GEMM_MC;
+	constexpr int Kblock = GEMM_KC;
+	constexpr int Nblock = GEMM_NC;
 	int currentMblock, currentKblock, currentNblock;
 	for (int i = 0; i < M; i += Mblock)
 	{
