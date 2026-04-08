@@ -297,7 +297,7 @@ void MatMul05(const int M, const int N, const int K, const int lda, const int ld
 				for (int ix = i; ix < i + currentMblock; ix++)
 					for (int kx = k; kx < k + currentKblock; kx++)
 					{
-						__m256 a = _mm256_set1_ps(A[ix * lda + kx]);
+						__m256 a = _mm256_broadcast_ss(A + ix * lda + kx);
 						int jx;
 						for (jx = j; jx <= j + currentNblock - 8; jx += 8)
 						{
@@ -437,7 +437,7 @@ void MatMul06(const int M, const int N, const int K, const int lda, const int ld
 
 								for (int i = 0; i < currentMR; i++)
 								{
-									a = _mm256_set1_ps(microA[i * lda + kr]);
+									a = _mm256_broadcast_ss(microA + i * lda + kr);
 									for (int l = 0; l < currentNR; l += 8)
 										c[i][l >> 3] = _mm256_fmadd_ps(a, b[l >> 3], c[i][l >> 3]);
 								}
@@ -473,7 +473,7 @@ void MatMul06(const int M, const int N, const int K, const int lda, const int ld
 
 								for (int i = 0; i < currentMR; i++)
 								{
-									a = _mm256_set1_ps(microA[i * lda + kr]);
+									a = _mm256_broadcast_ss(microA + i * lda + kr);
 									for (int l = 0; l < currentNR; l += 8)
 										c[i][l >> 3] = _mm256_fmadd_ps(a, b[l >> 3], c[i][l >> 3]);
 								}
@@ -561,7 +561,7 @@ void MatMul07(const int M, const int N, const int K, const int lda, const int ld
 
 							for (int i = 0; i < MR; i++)
 							{
-								a = _mm256_set1_ps(microA[kr * MR + i]);
+								a = _mm256_broadcast_ss(microA + kr * MR + i);
 								for (int l = 0; l < nr; l++)
 									c[i][l] = _mm256_fmadd_ps(a, b[l], c[i][l]);
 							}
@@ -640,7 +640,7 @@ void MatMul08(const int M, const int N, const int K, const int lda, const int ld
 
 							for (int i = 0; i < MR; i++)
 							{
-								a = _mm256_set1_ps(microA[kr * MR + i]);
+								a = _mm256_broadcast_ss(microA + kr * MR + i);
 								for (int l = 0; l < nr; l++)
 									c[i][l] = _mm256_fmadd_ps(a, b[l], c[i][l]);
 							}
@@ -733,7 +733,7 @@ void MatMul09(const int M, const int N, const int K, const int lda, const int ld
 									b[l] = _mm256_load_ps(microB + kr * NR + l * 8);
 								for (int i = 0; i < MR; i++)
 								{
-									a = _mm256_set1_ps(microA[kr * MR + i]);
+									a = _mm256_broadcast_ss(microA + kr * MR + i);
 									for (int l = 0; l < nr; l++)
 										c[i][l] = _mm256_fmadd_ps(a, b[l], c[i][l]);
 								}
@@ -834,27 +834,27 @@ void MatMul10(const int M, const int N, const int K, const int lda, const int ld
 								b0 = _mm256_load_ps(microB + kr * NR);
 								b1 = _mm256_load_ps(microB + kr * NR + 8);
 
-								a = _mm256_set1_ps(microA[kr * 6]);
+								a = _mm256_broadcast_ss(microA + kr * 6);
 								c00 = _mm256_fmadd_ps(a, b0, c00);
 								c01 = _mm256_fmadd_ps(a, b1, c01);
 
-								a = _mm256_set1_ps(microA[kr * 6 + 1]);
+								a = _mm256_broadcast_ss(microA + kr * 6 + 1);
 								c10 = _mm256_fmadd_ps(a, b0, c10);
 								c11 = _mm256_fmadd_ps(a, b1, c11);
 
-								a = _mm256_set1_ps(microA[kr * 6 + 2]);
+								a = _mm256_broadcast_ss(microA + kr * 6 + 2);
 								c20 = _mm256_fmadd_ps(a, b0, c20);
 								c21 = _mm256_fmadd_ps(a, b1, c21);
 
-								a = _mm256_set1_ps(microA[kr * 6 + 3]);
+								a = _mm256_broadcast_ss(microA + kr * 6 + 3);
 								c30 = _mm256_fmadd_ps(a, b0, c30);
 								c31 = _mm256_fmadd_ps(a, b1, c31);
 
-								a = _mm256_set1_ps(microA[kr * 6 + 4]);
+								a = _mm256_broadcast_ss(microA + kr * 6 + 4);
 								c40 = _mm256_fmadd_ps(a, b0, c40);
 								c41 = _mm256_fmadd_ps(a, b1, c41);
 
-								a = _mm256_set1_ps(microA[kr * 6 + 5]);
+								a = _mm256_broadcast_ss(microA + kr * 6 + 5);
 								c50 = _mm256_fmadd_ps(a, b0, c50);
 								c51 = _mm256_fmadd_ps(a, b1, c51);
 							}
