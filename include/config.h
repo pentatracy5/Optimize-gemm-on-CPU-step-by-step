@@ -1,6 +1,7 @@
 #pragma once
 
 constexpr bool PROFILE = true;
+constexpr bool PROFILEREF = false;
 constexpr int WARMUP = 2;
 constexpr int NREPEATS = PROFILE ? 128 : 2;
 constexpr float TOLERANCE = 0.08f * NREPEATS;

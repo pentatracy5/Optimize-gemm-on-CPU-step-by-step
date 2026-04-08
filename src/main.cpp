@@ -69,7 +69,11 @@ void Run(int M, int N, int K, unsigned int version)
 	constexpr int totalVersions = sizeof(matmulFuncs) / sizeof(matmulFuncs[0]);
 	if (version >= totalVersions) version = totalVersions - 1;
 
-	MatMulFunc f{ matmulFuncs[version] };
+	MatMulFunc f;
+	if constexpr (PROFILEREF)
+		f = MatMulREF;
+	else
+		f = matmulFuncs[version];
 
 	constexpr int nrepeats = NREPEATS;
 

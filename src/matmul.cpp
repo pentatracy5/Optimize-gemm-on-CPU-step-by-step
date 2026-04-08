@@ -750,3 +750,138 @@ void MatMul09(const int M, const int N, const int K, const int lda, const int ld
 	_aligned_free(APanel);
 	_aligned_free(BPanel);
 }
+
+/**
+ * @brief 在 MatMul09 基础上，将 Micro Kernel 手动循环展开。
+ *
+ * @note 必须配合 config.h 中的 v3 版本的分块参数使用。
+ */
+void MatMul10(const int M, const int N, const int K, const int lda, const int ldb, const int ldc, float* A, float* B, float* C)
+{
+	constexpr int NC = GEMM_NC;
+	constexpr int MC = GEMM_MC;
+	constexpr int KC = GEMM_KC;
+	constexpr int NR = GEMM_NR;
+	constexpr int MR = GEMM_MR;
+	constexpr int nr = NR >> 3;
+	const int numBlocks = (M - 1 + MR) / MR;
+	int currentNC, currentKC;
+	float* macroB;
+	float* APanel = (float*)_aligned_malloc(sizeof(float) * MC * KC * OMP_THREADS, 32);
+	float* BPanel = (float*)_aligned_malloc(sizeof(float) * KC * NC, 32);
+	for (int jc = 0; jc < N; jc += NC)
+	{
+		currentNC = min(NC, N - jc);
+		for (int pc = 0; pc < K; pc += KC)
+		{
+			currentKC = min(KC, K - pc);
+			macroB = B + pc * ldb + jc;
+			PackB(ldb, currentKC, currentNC, NR, macroB, BPanel);
+
+			#pragma omp parallel num_threads(OMP_THREADS)
+			{
+				const int numThreads = omp_get_num_threads();
+				const int tid = omp_get_thread_num();
+				float* currentAPanel = APanel + tid * MC * currentKC;
+
+				const int numBlocksPerThread = numBlocks / numThreads;
+				const int numBlocksLeft = numBlocks % numThreads;
+				const int start = (tid * numBlocksPerThread + min(tid, numBlocksLeft)) * MR;
+				const int end = min(((tid + 1) * numBlocksPerThread + min((tid + 1), numBlocksLeft)) * MR, M);
+
+				int currentMC;
+				float* macroA, * macroC;
+				float* microA, * microB, * microC;
+				for (int ic = start; ic < end; ic += MC)
+				{
+					currentMC = min(MC, end - ic);
+					macroA = A + ic * lda + pc;
+					macroC = C + ic * ldc + jc;
+					PackA(lda, currentMC, currentKC, MR, macroA, currentAPanel);
+					//Macro Kernel
+					for (int jr = 0; jr < currentNC; jr += NR)
+					{
+						microB = BPanel + jr * currentKC;
+						for (int ir = 0; ir < currentMC; ir += MR)
+						{
+							microA = currentAPanel + ir * currentKC;
+							microC = macroC + ir * ldc + jr;
+							//Micro Kernel
+							__m256 c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, c50, c51;
+							__m256 b0, b1;
+							__m256 a;
+
+							c00 = _mm256_load_ps(microC);
+							c01 = _mm256_load_ps(microC + 8);
+
+							c10 = _mm256_load_ps(microC + ldc);
+							c11 = _mm256_load_ps(microC + ldc + 8);
+
+							c20 = _mm256_load_ps(microC + 2 * ldc);
+							c21 = _mm256_load_ps(microC + 2 * ldc + 8);
+
+							c30 = _mm256_load_ps(microC + 3 * ldc);
+							c31 = _mm256_load_ps(microC + 3 * ldc + 8);
+
+							c40 = _mm256_load_ps(microC + 4 * ldc);
+							c41 = _mm256_load_ps(microC + 4 * ldc + 8);
+
+							c50 = _mm256_load_ps(microC + 5 * ldc);
+							c51 = _mm256_load_ps(microC + 5 * ldc + 8);
+
+							for (int kr = 0; kr < currentKC; kr++)
+							{
+								b0 = _mm256_load_ps(microB + kr * NR);
+								b1 = _mm256_load_ps(microB + kr * NR + 8);
+
+								a = _mm256_set1_ps(microA[kr * 6]);
+								c00 = _mm256_fmadd_ps(a, b0, c00);
+								c01 = _mm256_fmadd_ps(a, b1, c01);
+
+								a = _mm256_set1_ps(microA[kr * 6 + 1]);
+								c10 = _mm256_fmadd_ps(a, b0, c10);
+								c11 = _mm256_fmadd_ps(a, b1, c11);
+
+								a = _mm256_set1_ps(microA[kr * 6 + 2]);
+								c20 = _mm256_fmadd_ps(a, b0, c20);
+								c21 = _mm256_fmadd_ps(a, b1, c21);
+
+								a = _mm256_set1_ps(microA[kr * 6 + 3]);
+								c30 = _mm256_fmadd_ps(a, b0, c30);
+								c31 = _mm256_fmadd_ps(a, b1, c31);
+
+								a = _mm256_set1_ps(microA[kr * 6 + 4]);
+								c40 = _mm256_fmadd_ps(a, b0, c40);
+								c41 = _mm256_fmadd_ps(a, b1, c41);
+
+								a = _mm256_set1_ps(microA[kr * 6 + 5]);
+								c50 = _mm256_fmadd_ps(a, b0, c50);
+								c51 = _mm256_fmadd_ps(a, b1, c51);
+							}
+
+							_mm256_store_ps(microC, c00);
+							_mm256_store_ps(microC + 8, c01);
+
+							_mm256_store_ps(microC + ldc, c10);
+							_mm256_store_ps(microC + ldc + 8, c11);
+
+							_mm256_store_ps(microC + 2 * ldc, c20);
+							_mm256_store_ps(microC + 2 * ldc + 8, c21);
+
+							_mm256_store_ps(microC + 3 * ldc, c30);
+							_mm256_store_ps(microC + 3 * ldc + 8, c31);
+
+							_mm256_store_ps(microC + 4 * ldc, c40);
+							_mm256_store_ps(microC + 4 * ldc + 8, c41);
+
+							_mm256_store_ps(microC + 5 * ldc, c50);
+							_mm256_store_ps(microC + 5 * ldc + 8, c51);
+						}
+					}
+				}
+			}
+		}
+	}
+	_aligned_free(APanel);
+	_aligned_free(BPanel);
+}
