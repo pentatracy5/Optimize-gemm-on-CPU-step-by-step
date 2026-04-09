@@ -95,6 +95,5 @@ void CheckResult(const int M, const int N, const int ldc, float* C, float* REF, 
 				cout << "Error: C(" << i << ", " << j << ") = " << C[i * ldc + j] << ", but expected " << REF[i * ldc + j] << endl;
 				return;
 			}
-	cout << "Check passed!" << endl;
 	return;
 }

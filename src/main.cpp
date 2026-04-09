@@ -18,9 +18,9 @@ void Test(int M, int N, int K, unsigned int version)
 	MatMulFunc f{ matmulFuncs[version] };
 	MatMulFunc ref{ MatMulREF };
 
-	constexpr float tolerance = TOLERANCE;
 	constexpr int nrepeats = NREPEATS;
 	constexpr int warmup = WARMUP;
+	const float tolerance = TOLERANCE * K;
 
 	float* A, * B, * C, * REF;
 	int lda, ldb, ldc;
@@ -57,7 +57,7 @@ void Test(int M, int N, int K, unsigned int version)
 
 	double flops = 2 * M / 1000.0 * N / 1000.0 * K / 1000.0;
 	cout << "M\tN\tK\tref_GFLOPS\tf_GFLOPS" << endl;
-	cout << M << '\t' << N << '\t' << K << '\t' << flops / time_ref << '\t' << flops / time_f << endl;
+	cout << M << '\t' << N << '\t' << K << '\t' << flops / time_ref << '\t' << '\t' << flops / time_f << endl;
 
 	CheckResult(M, N, ldc, C, REF, tolerance);
 

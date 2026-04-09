@@ -4,7 +4,7 @@ constexpr bool PROFILE = true;
 constexpr bool PROFILEREF = false;
 constexpr int WARMUP = 2;
 constexpr int NREPEATS = PROFILE ? 128 : 2;
-constexpr float TOLERANCE = 0.08f * NREPEATS;
+constexpr float TOLERANCE = 2e-5 * NREPEATS;
 
 #define USE_OMP
 #ifdef USE_OMP
