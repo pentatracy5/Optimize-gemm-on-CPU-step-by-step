@@ -1,9 +1,16 @@
 #include <config.h>
 #include <utils.h>
 #include <algorithm>
+#include <atomic>
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <random>
 #include <vector>
+
+#if defined(_WIN32)
+#include <malloc.h>
+#endif
 
 using std::fill;
 using std::cout;
@@ -13,33 +20,61 @@ using std::random_device;
 using std::uniform_real_distribution;
 using std::vector;
 
+void* AlignedMalloc(size_t size, size_t alignment)
+{
+#if defined(_WIN32)
+    return _aligned_malloc(size, alignment);
+#else
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr, alignment, size) != 0)
+    {
+        return nullptr;
+    }
+    return ptr;
+#endif
+}
+
+void AlignedFree(void* ptr)
+{
+#if defined(_WIN32)
+    _aligned_free(ptr);
+#else
+    free(ptr);
+#endif
+}
+
 vector<int> v;
 void ClearCache()
 {
 	constexpr int cache_size = 32 * 1024 * 1024;
 	constexpr int num_elements = cache_size / sizeof(int);
 	v.resize(num_elements, 0);
-	std::fill(v.begin(), v.end(), 0);
+	volatile int* data = const_cast<volatile int*>(v.data());
+	for (int i = 0; i < num_elements; ++i)
+	{
+		data[i] = 0;
+	}
+	std::atomic_thread_fence(std::memory_order_seq_cst);
 }
 
 void MallocMatrix(const int M, const int N, const int K, int& lda, int& ldb, int& ldc, float*& A, float*& B, float*& C, float*& REF)
 {
-	A = (float*)_aligned_malloc(sizeof(float) * M * K, 32);
-	B = (float*)_aligned_malloc(sizeof(float) * K * N, 32);
+	A = (float*)AlignedMalloc(sizeof(float) * M * K, 32);
+	B = (float*)AlignedMalloc(sizeof(float) * K * N, 32);
 	lda = K;
 	ldb = N;
 	ldc = ((N - 1) / GEMM_NR + 1) * GEMM_NR;
 	int m = ((M - 1) / GEMM_MR + 1) * GEMM_MR;
-	C = (float*)_aligned_malloc(sizeof(float) * m * ldc, 32);
-	REF = (float*)_aligned_malloc(sizeof(float) * m * ldc, 32);
+	C = (float*)AlignedMalloc(sizeof(float) * m * ldc, 32);
+	REF = (float*)AlignedMalloc(sizeof(float) * m * ldc, 32);
 }
 
 void FreeMatrix(float*& A, float*& B, float*& C, float*& REF)
 {
-	_aligned_free(A);
-	_aligned_free(B);
-	_aligned_free(C);
-	_aligned_free(REF);
+	AlignedFree(A);
+	AlignedFree(B);
+	AlignedFree(C);
+	AlignedFree(REF);
 	A = nullptr;
 	B = nullptr;
 	C = nullptr;
@@ -55,8 +90,9 @@ void InitABCREF(const int M, const int N, const int K, const int lda, const int 
 		A[i] = dist(engine);
 	for (int i = 0; i < K * ldb; i++)
 		B[i] = dist(engine);
-	fill(C, C + M * ldc, 0);
-	fill(REF, REF + M * ldc, 0);
+	int m = ((M - 1) / GEMM_MR + 1) * GEMM_MR;
+	fill(C, C + m * ldc, 0.0f);
+	fill(REF, REF + m * ldc, 0.0f);
 }
 
 void PrintABC(const int M, const int N, const int K, const int lda, const int ldb, const int ldc, float* A, float* B, float* C)

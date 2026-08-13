@@ -1,5 +1,11 @@
 #pragma once
 
+#include <cstddef>
+
+void* AlignedMalloc(size_t size, size_t alignment);
+
+void AlignedFree(void* ptr);
+
 void ClearCache();
 
 void MallocMatrix(const int M, const int N, const int K, int& lda, int& ldb, int& ldc, float*& A, float*& B, float*& C, float*& REF);
