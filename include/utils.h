@@ -3,7 +3,6 @@
 #include <cstddef>
 
 void* AlignedMalloc(size_t size, size_t alignment);
-
 void AlignedFree(void* ptr);
 
 void ClearCache();
