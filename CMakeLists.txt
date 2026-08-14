@@ -15,7 +15,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Global dependencies used by the library and/or the executable.
 find_package(OpenMP REQUIRED)
 
-# Intel MKL: use the single dynamic library (mkl_rt) with Intel OpenMP threading.
-find_package(MKL REQUIRED)
+# Intel MKL: use the official oneAPI MKLConfig.cmake.
+# Make sure oneAPI environment is set (e.g., source setvars.sh / run setvars.bat),
+# or pass -D MKL_DIR=<path/to/mkl/latest/lib/cmake/mkl> to CMake.
+find_package(MKL CONFIG REQUIRED)
 
 add_subdirectory(src)
